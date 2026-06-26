@@ -1,0 +1,127 @@
+
+<style>
+#erd-wrap { padding: 1rem 0; }
+</style>
+<div id="erd-wrap">
+  <div id="erd"></div>
+</div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+    primaryColor: dark ? '#2a2a28' : '#f5f4f0',
+    primaryBorderColor: dark ? '#5f5e5a' : '#b4b2a9',
+    primaryTextColor: dark ? '#c2c0b6' : '#3d3d3a',
+  },
+});
+const diagram = `erDiagram
+  audit_templates {
+    bigint id PK
+    varchar name
+    text description
+    boolean is_active
+  }
+
+  audit_level_configs {
+    bigint id PK
+    bigint template_id FK
+    int level
+    varchar label
+    boolean is_required
+    int sort_order
+  }
+
+  audit_categories {
+    bigint id PK
+    bigint template_id FK
+    bigint parent_id FK
+    int level
+    varchar name
+    int sort_order
+    boolean is_active
+  }
+
+  audit_items {
+    bigint id PK
+    bigint category_id FK
+    varchar code
+    text name
+    text description
+    int sort_order
+    boolean is_active
+  }
+
+  audits {
+    bigint id PK
+    bigint template_id FK
+    varchar title
+    date audit_date
+    bigint auditor_id FK
+    varchar status
+    timestamp created_at
+  }
+
+  audit_item_results {
+    bigint id PK
+    bigint audit_id FK
+    bigint item_id FK
+    varchar status
+    text notes
+    bigint reviewed_by FK
+    timestamp reviewed_at
+  }
+
+  audit_evidences {
+    bigint id PK
+    bigint result_id FK
+    varchar file_url
+    varchar file_type
+    varchar original_name
+    bigint file_size
+    text caption
+    bigint uploaded_by FK
+    timestamp uploaded_at
+  }
+
+  audit_templates ||--o{ audit_level_configs : "punya"
+  audit_templates ||--o{ audit_categories : "gunakan"
+  audit_templates ||--o{ audits : "jadi dasar"
+  audit_categories ||--o{ audit_categories : "parent_id"
+  audit_categories ||--o{ audit_items : "berisi"
+  audits ||--o{ audit_item_results : "punya"
+  audit_items ||--o{ audit_item_results : "dievaluasi"
+  audit_item_results ||--o{ audit_evidences : "dilampiri"
+`;
+const { svg } = await mermaid.render('erd-svg', diagram);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+</script>

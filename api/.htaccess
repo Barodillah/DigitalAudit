@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Routes
+RewriteRule ^health$ health.php [L,QSA]
+RewriteRule ^login$ login.php [L,QSA]
+RewriteRule ^me$ me.php [L,QSA]
+RewriteRule ^dealers$ dealers.php [L,QSA]
+RewriteRule ^admins$ admins.php [L,QSA]
+RewriteRule ^staff$ staff.php [L,QSA]
+RewriteRule ^audits$ audits.php [L,QSA]
+RewriteRule ^audit_items$ audit_items.php [L,QSA]
+RewriteRule ^audit_levels$ audit_levels.php [L,QSA]
+RewriteRule ^reviewers$ reviewers.php [L,QSA]
+RewriteRule ^audit_links$ audit_links.php [L,QSA]
+RewriteRule ^verify_pin$ verify_pin.php [L,QSA]
+RewriteRule ^audit_executor$ audit_executor.php [L,QSA]
+RewriteRule ^upload_evidence$ upload_evidence.php [L,QSA]
+RewriteRule ^audit_evidences$ audit_evidences.php [L,QSA]
+RewriteRule ^audit_item_results$ audit_item_results.php [L,QSA]
