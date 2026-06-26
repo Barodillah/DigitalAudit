@@ -29,7 +29,27 @@ export default function AuditorView() {
   }, [activeId]);
 
   const fetchSessionInfo = async () => {
-    const authToken = localStorage.getItem('auth_token');
+    let authToken = localStorage.getItem('auth_token');
+
+    // Auto-login menggunakan UUID jika belum ada token
+    if (!authToken && activeId) {
+      try {
+        const loginRes = await fetch(`${API_BASE}/verify_link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uuid: activeId })
+        });
+        const loginData = await loginRes.json();
+        if (loginData.success) {
+           authToken = loginData.data.token;
+           localStorage.setItem('auth_token', authToken);
+           localStorage.setItem('auth_user', JSON.stringify(loginData.data.user));
+        }
+      } catch (err) {
+        console.error("Gagal auto-login dari link", err);
+      }
+    }
+
     if (!authToken) {
       toast.error('Sesi tidak ditemukan. Silakan login dengan PIN.');
       navigate('/');
