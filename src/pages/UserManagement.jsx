@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Plus, Mail, ShieldAlert, X, Loader2, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'https://csdwindo.com/audit/api';
+const API_BASE = 'https://audit.csdwindo.com/api';
 
 export default function UserManagement() {
   const [staff, setStaff] = useState([]);
@@ -140,6 +140,7 @@ export default function UserManagement() {
               <tr>
                 <th className="px-6 py-4 font-medium">Nama Staff</th>
                 <th className="px-6 py-4 font-medium">Email</th>
+                <th className="px-6 py-4 font-medium">Divisi</th>
                 <th className="px-6 py-4 font-medium">Role</th>
                 {isSuperAdmin && <th className="px-6 py-4 font-medium">Dealer</th>}
                 <th className="px-6 py-4 font-medium text-right">Aksi</th>
@@ -160,6 +161,9 @@ export default function UserManagement() {
                     <div className="flex items-center">
                       <Mail className="w-4 h-4 mr-2 text-slate-400" /> {s.email}
                     </div>
+                  </td>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    {s.division || '-'}
                   </td>
                   <td className="px-6 py-4">
                     {s.role === 'reviewer' ? (
@@ -194,7 +198,7 @@ export default function UserManagement() {
                 </tr>
               ))}
               {staff.length === 0 && (
-                <tr><td colSpan={isSuperAdmin ? "5" : "4"} className="px-6 py-10 text-center text-slate-500">Belum ada data staff</td></tr>
+                <tr><td colSpan={isSuperAdmin ? "6" : "5"} className="px-6 py-10 text-center text-slate-500">Belum ada data staff</td></tr>
               )}
             </tbody>
           </table>
@@ -230,6 +234,10 @@ export default function UserManagement() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Login <span className="text-red-500">*</span></label>
                   <input type="email" name="email" required defaultValue={modal.data?.email} placeholder="andi@dealer.com" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Divisi</label>
+                  <input type="text" name="division" defaultValue={modal.data?.division} placeholder="Misal: IT / HRD" className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none" />
                 </div>
                 <div>
                   <label className="flex justify-between text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">

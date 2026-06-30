@@ -54,7 +54,12 @@ if ($method === 'GET') {
                       SELECT COUNT(*) FROM audit_items i
                       JOIN audit_categories c ON c.id = i.category_id
                       WHERE c.template_id = a.template_id
-                   ) as total_items
+                   ) as total_items,
+                   (
+                      SELECT COUNT(DISTINCT r.item_id) FROM audit_evidences e
+                      JOIN audit_item_results r ON r.id = e.result_id
+                      WHERE r.audit_id = a.id
+                   ) as items_with_evidence
             FROM audits a
             LEFT JOIN users u ON u.id = a.auditor_id
             WHERE $where
@@ -63,9 +68,11 @@ if ($method === 'GET') {
         $stmt->execute($params);
         $audits = $stmt->fetchAll();
         
-        // Mock progress calculation for now since we haven't implemented responses
+        // Hitung progress berdasarkan item yang memiliki evidence / total items
         foreach ($audits as &$a) {
-            $a['progress'] = 0; // default 0
+            $total = (int)$a['total_items'];
+            $withEvidence = (int)$a['items_with_evidence'];
+            $a['progress'] = $total > 0 ? round(($withEvidence / $total) * 100) : 0;
         }
         
         jsonResponse(['success' => true, 'data' => $audits]);
@@ -135,6 +142,10 @@ elseif ($method === 'PUT') {
         $updates[] = "status = ?";
         $params[] = $input['status'];
     }
+    if (isset($input['title'])) {
+        $updates[] = "title = ?";
+        $params[] = $input['title'];
+    }
 
     if (empty($updates)) {
         jsonError('Tidak ada data yang diupdate', 400);
@@ -147,9 +158,21 @@ elseif ($method === 'PUT') {
         $stmt = $pdo->prepare("UPDATE audits SET $setSql WHERE id = ?");
         $stmt->execute($params);
 
-        jsonResponse(['success' => true, 'message' => 'Status audit berhasil diupdate']);
+        jsonResponse(['success' => true, 'message' => 'Audit berhasil diupdate']);
     } catch (Exception $e) {
         jsonError('Gagal update audit: ' . $e->getMessage(), 500);
+    }
+}
+elseif ($method === 'DELETE') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (empty($input['id'])) jsonError('Audit ID wajib diisi', 400);
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM audits WHERE id = ?");
+        $stmt->execute([$input['id']]);
+        jsonResponse(['success' => true, 'message' => 'Audit berhasil dihapus']);
+    } catch (Exception $e) {
+        jsonError('Gagal menghapus audit: ' . $e->getMessage(), 500);
     }
 }
 else {

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Loader2, Calendar, UserCircle2, ChevronRight, Folder, FileText, UploadCloud, Image as ImageIcon, Link, Trash2, X, CheckCircle, XCircle, MinusCircle, Save, Search } from 'lucide-react';
+import { ShieldCheck, Loader2, Calendar, UserCircle2, ChevronRight, Folder, FileText, UploadCloud, Image as ImageIcon, Link, Trash2, X, CheckCircle, XCircle, MinusCircle, Save, Search, ArrowLeft, MonitorSmartphone, Maximize, Minimize } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'https://csdwindo.com/audit/api';
+const API_BASE = 'https://audit.csdwindo.com/api';
 
 export default function AuditorView() {
   const { uuid, token } = useParams();
@@ -17,7 +17,17 @@ export default function AuditorView() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [evidences, setEvidences] = useState([]);
   const [previewModal, setPreviewModal] = useState({ isOpen: false, currentIndex: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDesktopWarning, setShowDesktopWarning] = useState(false);
+
+  useEffect(() => {
+    const isDismissed = localStorage.getItem('desktop_warning_dismissed');
+    const isMobile = window.innerWidth < 768; // Tampilkan hanya di layar kecil (mobile)
+    if (!isDismissed && isMobile) {
+      setShowDesktopWarning(true);
+    }
+  }, []);
 
   // Evaluation states
   const [itemResult, setItemResult] = useState({ status: 'pending', notes: '' });
@@ -223,6 +233,17 @@ export default function AuditorView() {
     }
   };
 
+  const goToPrevItem = () => {
+    if (!selectedItem) return;
+    const allItems = getAllItems();
+    const currentIndex = allItems.findIndex(i => i.id === selectedItem.id);
+    if (currentIndex > 0) {
+      setSelectedItem(allItems[currentIndex - 1]);
+    } else {
+      toast.error("Ini adalah parameter pertama.");
+    }
+  };
+
   const renderTree = (nodes, parentPrefix = '', depth = 0) => {
     return nodes.map((node, index) => {
       let currentPrefix = depth === 0 ? String.fromCharCode(65 + index) : `${parentPrefix}.${index + 1}`;
@@ -253,7 +274,7 @@ export default function AuditorView() {
                     className={`flex items-center justify-between p-2 rounded-lg text-sm cursor-pointer border transition-all ${isSelected ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-medium' : 'hover:bg-white dark:hover:bg-slate-800 border-transparent hover:border-slate-200 text-slate-600 dark:text-slate-400'}`}
                   >
                     <div className="flex items-center gap-2">
-                      <FileText className={`w-4 h-4 ${isSelected ? 'text-blue-500' : 'text-slate-400'}`} />
+                      <FileText className={`w-4 h-4 shrink-0 ${isSelected ? 'text-blue-500' : 'text-slate-400'}`} />
                       <span className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-bold">{itemCode}</span>
                       <span>{item.name}</span>
                     </div>
@@ -270,7 +291,7 @@ export default function AuditorView() {
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-8 h-8 animate-spin text-purple-600" /></div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col">
       <header className="flex flex-col md:flex-row justify-between md:items-center px-6 py-4 border-b bg-white dark:bg-slate-900 shadow-sm gap-4 shrink-0">
         <div className="flex items-center">
           <ShieldCheck className="w-8 h-8 text-purple-600 mr-3 shrink-0" />
@@ -291,10 +312,10 @@ export default function AuditorView() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         {/* Left Sidebar - Tree */}
-        <div className="w-80 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className={`w-full md:w-80 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0 ${selectedItem ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 shrink-0 shadow-sm">
             <h2 className="font-bold text-slate-800 dark:text-white mb-3">Parameter Audit</h2>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -319,10 +340,17 @@ export default function AuditorView() {
         </div>
 
         {/* Right Panel - Evaluation */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 overflow-hidden relative">
+        <div className={`flex-1 flex-col bg-white dark:bg-slate-950 overflow-hidden relative ${!selectedItem ? 'hidden md:flex' : 'flex'}`}>
           {selectedItem ? (
-            <div className="flex-1 overflow-y-auto p-8">
-              <div className="max-w-4xl mx-auto space-y-8">
+            <div className="flex-1 overflow-y-auto p-4 md:p-8">
+              <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
+                
+                <button 
+                  onClick={() => setSelectedItem(null)} 
+                  className="md:hidden flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 font-medium bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg self-start w-fit"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar
+                </button>
 
                 {/* Header Info */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
@@ -349,7 +377,7 @@ export default function AuditorView() {
                           >
                             <div className="flex items-center gap-3 overflow-hidden">
                               <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
-                                {ev.file_type.includes('pdf') ? <FileText className="w-5 h-5 text-red-500" /> : <ImageIcon className="w-5 h-5 text-blue-500" />}
+                                {ev.file_type.includes('pdf') ? <FileText className="w-5 h-5 shrink-0 text-red-500" /> : <ImageIcon className="w-5 h-5 shrink-0 text-blue-500" />}
                               </div>
                               <div className="min-w-0">
                                 <p className="font-medium text-sm text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{ev.original_name}</p>
@@ -443,12 +471,23 @@ export default function AuditorView() {
       {/* Preview Evidence Modal */}
       {previewModal.isOpen && evidences.length > 0 && (
         <div className="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
-            <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white truncate pr-4">
-                {evidences[previewModal.currentIndex]?.original_name}
-              </h3>
-              <div className="flex items-center gap-2">
+          <div className={`bg-white dark:bg-slate-900 w-full overflow-hidden flex flex-col transition-all ${isFullscreen ? 'h-full max-w-none rounded-none' : 'max-w-4xl max-h-[95vh] rounded-2xl shadow-2xl'}`}>
+            <div className="flex justify-between items-start p-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex-1 pr-4">
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white truncate">
+                  {evidences[previewModal.currentIndex]?.original_name}
+                </h3>
+                {evidences[previewModal.currentIndex]?.caption ? (
+                  <p className="text-base font-medium text-slate-800 dark:text-slate-200 mt-3 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg shadow-sm">
+                    {evidences[previewModal.currentIndex].caption}
+                  </p>
+                ) : (
+                  <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 italic">
+                    Tidak ada caption
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-1 shrink-0">
                 <a
                   href={evidences[previewModal.currentIndex]?.file_url}
                   download={evidences[previewModal.currentIndex]?.original_name}
@@ -468,7 +507,17 @@ export default function AuditorView() {
                   <Link className="w-5 h-5" />
                 </a>
                 <button
-                  onClick={() => setPreviewModal({ isOpen: false, currentIndex: 0 })}
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  title="Layar Penuh"
+                >
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                </button>
+                <button
+                  onClick={() => {
+                    setPreviewModal({ isOpen: false, currentIndex: 0 });
+                    setIsFullscreen(false);
+                  }}
                   className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg"
                 >
                   <X className="w-6 h-6" />
@@ -501,16 +550,54 @@ export default function AuditorView() {
         </div>
       )}
 
-      {/* Floating Next Item Button */}
+      {/* Floating Navigation Buttons */}
       {selectedItem && (
-        <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-2">
-          <button 
-            onClick={goToNextItem}
-            title="Lanjut ke Parameter Berikutnya"
-            className="w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all hover:scale-110 border-4 border-white dark:border-slate-950"
-          >
-            <ChevronRight className="w-7 h-7 ml-1" />
-          </button>
+        <>
+          <div className="fixed left-6 md:left-[344px] top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-2">
+            <button 
+              onClick={goToPrevItem}
+              title="Kembali ke Parameter Sebelumnya"
+              className="w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all hover:scale-110 border-4 border-white dark:border-slate-950"
+            >
+              <ChevronRight className="w-7 h-7 mr-1 rotate-180" />
+            </button>
+          </div>
+          
+          <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-2">
+            <button 
+              onClick={goToNextItem}
+              title="Lanjut ke Parameter Berikutnya"
+              className="w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all hover:scale-110 border-4 border-white dark:border-slate-950"
+            >
+              <ChevronRight className="w-7 h-7 ml-1" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Desktop Warning Modal */}
+      {showDesktopWarning && (
+        <div className="fixed inset-0 z-[70] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4">
+                <MonitorSmartphone className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Gunakan Desktop</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                Untuk pengalaman terbaik dan optimal dalam mengisi evaluasi audit, disarankan menggunakan perangkat Desktop atau Laptop.
+              </p>
+              <button
+                onClick={() => {
+                  localStorage.setItem('desktop_warning_dismissed', '1');
+                  setShowDesktopWarning(false);
+                }}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm transition-all shadow-sm"
+              >
+                Saya Mengerti
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

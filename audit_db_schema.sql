@@ -15,6 +15,7 @@ CREATE TABLE users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+    division VARCHAR(255) NULL,
     role ENUM('super_admin', 'admin', 'staff', 'reviewer', 'viewer') DEFAULT 'staff',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -130,4 +131,14 @@ CREATE TABLE audit_evidences (
     caption       TEXT,
     uploaded_by   BIGINT NOT NULL REFERENCES users(id),
     uploaded_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Penugasan staff/user ke item spesifik dalam sebuah audit
+CREATE TABLE audit_item_assignments (
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    audit_id    BIGINT NOT NULL REFERENCES audits(id) ON DELETE CASCADE,
+    item_id     BIGINT NOT NULL REFERENCES audit_items(id) ON DELETE CASCADE,
+    user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (audit_id, item_id, user_id)
 );

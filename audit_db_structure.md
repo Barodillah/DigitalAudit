@@ -20,6 +20,7 @@ Menyimpan data pengguna aplikasi (Auditor, Admin, Reviewer).
 - `name` (VARCHAR): Nama lengkap.
 - `email` (VARCHAR)
 - `password` (VARCHAR)
+- `division` (VARCHAR): Divisi/departemen pengguna.
 - `role` (ENUM): 'super_admin', 'admin', 'staff', 'reviewer', 'viewer'
 - `created_at` (TIMESTAMP)
 
@@ -117,6 +118,14 @@ File *evidence* (gambar/dokumen) yang diunggah untuk mendukung hasil penilaian i
 - `caption` (TEXT)
 - `uploaded_by` (BIGINT, FK ke `users.id`)
 - `uploaded_at` (TIMESTAMP)
+
+### 2.4 `audit_item_assignments`
+Penugasan satu atau lebih staff ke item audit tertentu.
+- `id` (BIGINT, PK)
+- `audit_id` (BIGINT, FK ke `audits`)
+- `item_id` (BIGINT, FK ke `audit_items`)
+- `user_id` (BIGINT, FK ke `users`)
+- `assigned_at` (TIMESTAMP)
 
 ---
 

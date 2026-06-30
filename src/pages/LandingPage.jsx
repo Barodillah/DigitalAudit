@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, FileSearch, Building2, ChevronDown, CheckCircle2, KeyRound, X, Loader2 } from 'lucide-react';
+import logoImg from '../assets/logo.png';
 import toast from 'react-hot-toast';
 
-const API_BASE = 'https://csdwindo.com/audit/api';
+const API_BASE = 'https://audit.csdwindo.com/api';
 
 export default function LandingPage() {
   const [activeRole, setActiveRole] = useState(null); // 'dealer' or 'auditor'
@@ -37,10 +38,10 @@ export default function LandingPage() {
   const handlePinChange = (index, value) => {
     // Hanya boleh angka
     if (value && !/^\d+$/.test(value)) return;
-    
+
     // Ambil karakter terakhir jika diketik/paste banyak
     const digit = value.slice(-1);
-    
+
     const newPin = [...pin];
     newPin[index] = digit;
     setPin(newPin);
@@ -49,9 +50,9 @@ export default function LandingPage() {
     if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
-    
+
     // Auto submit jika semua terisi
-    if (digit && index === 5 && newPin.slice(0,5).every(p => p !== '')) {
+    if (digit && index === 5 && newPin.slice(0, 5).every(p => p !== '')) {
       setTimeout(async () => {
         setIsLoading(true);
         const pinCode = newPin.join('');
@@ -89,9 +90,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <header className="absolute top-0 w-full p-6 flex justify-between items-center z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <ShieldCheck className="w-5 h-5 text-white" />
-          </div>
+          <img src={logoImg} alt="AuditDigital" className="w-8 h-8 object-contain drop-shadow-sm" />
           <span className="font-bold text-xl tracking-tight text-slate-900 dark:text-white">AuditDigital</span>
         </div>
         <div className="text-sm font-medium px-3 py-1 rounded-full bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 shadow-sm">
@@ -106,11 +105,11 @@ export default function LandingPage() {
           <div className="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-blue-500/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse"></div>
           <div className="absolute top-1/3 right-1/4 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse" style={{ animationDelay: '2s' }}></div>
           <div className="absolute -bottom-32 left-1/3 w-[30rem] h-[30rem] bg-slate-500/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse" style={{ animationDelay: '4s' }}></div>
-          
+
           {/* Subtle Grid Pattern */}
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wNSkiLz48L3N2Zz4=')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
         </div>
-        
+
         <div className="z-10 max-w-5xl mx-auto flex flex-col items-center text-center space-y-8 mt-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium shadow-sm">
             <span className="relative flex h-2 w-2">
@@ -119,14 +118,14 @@ export default function LandingPage() {
             </span>
             Sistem Audit Generasi Baru
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
             <span className="block">Standarisasi</span>
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
               Audit Profesional
             </span>
           </h1>
-          
+
           <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed font-light">
             Platform korporasi modern untuk manajemen, eksekusi, dan evaluasi proses audit dealer secara terpusat, transparan, dan terdigitalisasi penuh.
           </p>
@@ -158,7 +157,7 @@ export default function LandingPage() {
                             navigate('/dealer');
                             return;
                           }
-                        } catch (e) {}
+                        } catch (e) { }
                         setActiveRole('dealer');
                       }}
                       className="inline-flex items-center justify-between w-full px-6 py-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors group/btn shadow-md"
@@ -199,7 +198,7 @@ export default function LandingPage() {
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-inner ${activeRole === 'dealer' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'}`}>
                     {activeRole === 'dealer' ? <Building2 className="w-6 h-6" /> : <KeyRound className="w-6 h-6" />}
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       setActiveRole(null);
                       setPin(['', '', '', '', '', '']);
@@ -210,12 +209,12 @@ export default function LandingPage() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                   {activeRole === 'dealer' ? 'Login Dealer' : 'Masukkan PIN'}
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-8 text-sm">
-                  {activeRole === 'dealer' 
+                  {activeRole === 'dealer'
                     ? 'Masukkan email dan kata sandi Anda untuk mengakses dashboard manajemen audit.'
                     : 'Masukkan 6 digit PIN akses auditor Anda untuk mulai meninjau evidence.'}
                 </p>
@@ -279,8 +278,8 @@ export default function LandingPage() {
                         />
                       </div>
                     </div>
-                    
-                    <button 
+
+                    <button
                       type="submit"
                       disabled={isLoading}
                       className="w-full py-4 mt-6 rounded-xl text-white font-semibold transition-colors shadow-md flex items-center justify-center group bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -314,7 +313,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <button 
+                      <button
                         className="w-full py-4 rounded-xl text-white font-semibold transition-colors shadow-md flex items-center justify-center group bg-slate-900 dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
                         disabled={isLoading}
                         onClick={async () => {
@@ -417,13 +416,11 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-12 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 text-center relative z-10">
         <div className="flex items-center justify-center gap-2 mb-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer">
-          <div className="w-6 h-6 rounded bg-slate-900 dark:bg-white flex items-center justify-center">
-            <ShieldCheck className="w-3 h-3 text-white dark:text-slate-900" />
-          </div>
+          <img src={logoImg} alt="AuditDigital" className="w-6 h-6 object-contain" />
           <span className="font-bold text-slate-900 dark:text-white tracking-tight">AuditDigital</span>
         </div>
         <p className="text-slate-500 dark:text-slate-500 text-sm font-medium">
-          &copy; 2026 Audit Digital Enterprise. Membangun Kepatuhan Masa Depan.
+          &copy; 2026 <a href="https://csdwindo.com" target="_blank" rel="noopener noreferrer">CS Dwindo</a>. Membangun Kepatuhan Masa Depan.
         </p>
       </footer>
     </div>

@@ -1,6 +1,7 @@
 RewriteEngine On
 
 # Routes
+RewriteRule ^dashboard$ dashboard.php [L,QSA]
 RewriteRule ^health$ health.php [L,QSA]
 RewriteRule ^login$ login.php [L,QSA]
 RewriteRule ^me$ me.php [L,QSA]
@@ -18,3 +19,4 @@ RewriteRule ^audit_executor$ audit_executor.php [L,QSA]
 RewriteRule ^upload_evidence$ upload_evidence.php [L,QSA]
 RewriteRule ^audit_evidences$ audit_evidences.php [L,QSA]
 RewriteRule ^audit_item_results$ audit_item_results.php [L,QSA]
+RewriteRule ^item_assignments$ item_assignments.php [L,QSA]

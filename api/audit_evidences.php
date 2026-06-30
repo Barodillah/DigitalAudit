@@ -45,6 +45,18 @@ if ($method === 'GET') {
 
     jsonResponse(['success' => true, 'data' => $evidences]);
 }
+// Update Caption
+elseif ($method === 'PUT') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (empty($input['id'])) jsonError('ID diperlukan', 400);
+
+    $caption = isset($input['caption']) ? $input['caption'] : null;
+
+    $stmt = $pdo->prepare("UPDATE audit_evidences SET caption = ? WHERE id = ?");
+    $stmt->execute([$caption, $input['id']]);
+
+    jsonResponse(['success' => true, 'message' => 'Caption berhasil diperbarui']);
+}
 // DELETE if needed
 elseif ($method === 'DELETE') {
     $input = json_decode(file_get_contents('php://input'), true);

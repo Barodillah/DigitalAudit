@@ -36,7 +36,7 @@ $myDealerId = $user['dealer_id'];
 if ($method === 'GET') {
     if ($isAdmin) {
         $stmt = $pdo->prepare("
-            SELECT u.id, u.name, u.email, u.role, u.dealer_id, d.name AS dealer_name 
+            SELECT u.id, u.name, u.email, u.role, u.dealer_id, u.division, d.name AS dealer_name 
             FROM users u 
             LEFT JOIN dealers d ON d.id = u.dealer_id 
             WHERE u.role IN ('staff', 'reviewer') AND u.dealer_id = ?
@@ -45,7 +45,7 @@ if ($method === 'GET') {
         $stmt->execute([$myDealerId]);
     } else {
         $stmt = $pdo->query("
-            SELECT u.id, u.name, u.email, u.role, u.dealer_id, d.name AS dealer_name 
+            SELECT u.id, u.name, u.email, u.role, u.dealer_id, u.division, d.name AS dealer_name 
             FROM users u 
             LEFT JOIN dealers d ON d.id = u.dealer_id 
             WHERE u.role IN ('staff', 'reviewer')
@@ -75,13 +75,14 @@ elseif ($method === 'POST') {
     $hash = password_hash($input['password'], PASSWORD_BCRYPT);
     
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role, dealer_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role, dealer_id, division) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $input['name'],
             $input['email'],
             $hash,
             $input['role'],
-            $dealer_id
+            $dealer_id,
+            $input['division'] ?? null
         ]);
         
         jsonResponse(['success' => true, 'message' => 'Staff berhasil ditambahkan', 'id' => $pdo->lastInsertId()]);
@@ -115,11 +116,11 @@ elseif ($method === 'PUT') {
     try {
         if (!empty($input['password'])) {
             $hash = password_hash($input['password'], PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, password = ?, role = ?, dealer_id = ? WHERE id = ?");
-            $stmt->execute([$input['name'], $input['email'], $hash, $input['role'], $dealer_id, $id]);
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, password = ?, role = ?, dealer_id = ?, division = ? WHERE id = ?");
+            $stmt->execute([$input['name'], $input['email'], $hash, $input['role'], $dealer_id, $input['division'] ?? null, $id]);
         } else {
-            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ?, dealer_id = ? WHERE id = ?");
-            $stmt->execute([$input['name'], $input['email'], $input['role'], $dealer_id, $id]);
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ?, dealer_id = ?, division = ? WHERE id = ?");
+            $stmt->execute([$input['name'], $input['email'], $input['role'], $dealer_id, $input['division'] ?? null, $id]);
         }
         
         jsonResponse(['success' => true, 'message' => 'Staff berhasil diupdate']);

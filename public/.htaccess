@@ -1,14 +1,14 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /audit/
+  RewriteBase /
   
   # Jangan arahkan ulang jika request menuju folder api
-  RewriteCond %{REQUEST_URI} ^/audit/api [NC]
+  RewriteCond %{REQUEST_URI} ^/api [NC]
   RewriteRule ^ - [L]
 
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
-  RewriteRule . /audit/index.html [L]
+  RewriteRule . /index.html [L]
 </IfModule>
